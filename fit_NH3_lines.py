@@ -77,6 +77,12 @@ def cubefit(region='IC348', do_plot=True,
         vmin=6.0
         vmax=9.0
         rms=3e-1
+    elif region == 'L1451mm':
+        OneOneFile = 'L1451mm/L1451MM-11_cvel_clean_rob05.fits'
+        TwoTwoFile = 'L1451mm/L1451MM-11_cvel_clean_rob05.fits'
+        vmin=3.2
+        vmax=4.9
+        rms=1.6e-3
     else:
         message('Nothing defined here yet... check the regions')
     
