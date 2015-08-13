@@ -246,3 +246,9 @@ def test_cube():
                   minpars=[5,2.8,12.0,0,6.0,0],
                   start_from_point=(243,243),
                   use_neighbor_as_guess=True)
+
+def convert_param_file(region='L1451mm'):
+    import GAS
+    if region eq 'L1451mm':
+        GAS.PropertyMaps.update_cubefit(region=region)
+        
