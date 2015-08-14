@@ -1,0 +1,5 @@
+# 
+*.pyc
+*.fits
+
+.ipynb_checkpoints/

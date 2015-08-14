@@ -240,7 +240,7 @@ def convert_param_file(region='L1451mm', snr_min=5.0):
     parameter) into a set of files (v1, one FITS per parameter). 
     """
 
-    if region != 'L1451mm' and region != 'IC348':
+    if region != 'L1451mm' and region != 'IC348' and region != 'IRAS03282':
         return 'error'
 
     hdu=fits.open("{0}_parameter_maps_snr{1}.fits".format(region,snr_min))
