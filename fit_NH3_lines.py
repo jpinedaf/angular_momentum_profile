@@ -13,19 +13,6 @@ from skimage.morphology import remove_small_objects,closing,disk,opening
 freq11= 23.6944955*u.GHz
 freq22= 23.7226336*u.GHz
 
-def fix_IC348():
-    OneOneFile = 'fits_files/HH211_Per1/IC348.NH3.11.fits'
-    TwoTwoFile = 'fits_files/HH211_Per1/IC348.NH3.22.fits'
-    data, hd= fits.getdata( OneOneFile, header=True)
-    hd['CTYPE3'] = 'VOPT'
-    hd['VELREF'] = 257
-    fits.writeto(OneOneFile, data, hd, clobber=True)
-
-    data, hd= fits.getdata( TwoTwoFile, header=True)
-    hd['CTYPE3'] = 'VOPT'
-    hd['VELREF'] = 257
-    fits.writeto(TwoTwoFile, data, hd, clobber=True)
-
 def fix_IRAS03282():
     OneOneFile = 'fits_files/IRAS03282_Per5/IRAS03282.NH3.11.fits'
     TwoTwoFile = 'fits_files/IRAS03282_Per5/IRAS03282.NH3.22.fits'
@@ -66,10 +53,10 @@ def cubefit(region='IC348', do_plot=True,
         Numbers of cores to use for parallel processing. 
     """
     if region == 'IC348':
-        OneOneFile = 'fits_files/HH211_Per1/IC348_NH3_11.fits'
-        TwoTwoFile = 'fits_files/HH211_Per1/IC348_NH3_22.fits'
-        vmin=-1.0
-        vmax=1.0
+        OneOneFile = 'IC348mm/IC348mm-11_cvel_clean_rob05.fits'
+        TwoTwoFile = 'IC348mm/IC348mm-11_cvel_clean_rob05.fits'
+        vmin=7.4
+        vmax=10.0
         rms=3e-3
     elif region == 'IRAS03282':
         OneOneFile = 'fits_files/IRAS03282_Per5/IRAS03282_NH3_11.fits'
@@ -181,7 +168,7 @@ def cubefit(region='IC348', do_plot=True,
     fitcubefile.header.update('CTYPE3','FITPAR')
     fitcubefile.header.update('CRVAL3',0)
     fitcubefile.header.update('CRPIX3',1)
-    fitcubefile.writeto("{0}_parameter_maps.fits".format(region),clobber=True)
+    fitcubefile.writeto("{0}_parameter_maps_snr{1}.fits".format(region,snr_min),clobber=True)
 
 def test_cube():
     import numpy as np
@@ -247,8 +234,86 @@ def test_cube():
                   start_from_point=(243,243),
                   use_neighbor_as_guess=True)
 
-def convert_param_file(region='L1451mm'):
-    import GAS
-    if region eq 'L1451mm':
-        GAS.PropertyMaps.update_cubefit(region=region)
+def convert_param_file(region='L1451mm', snr_min=5.0):
+    """
+    Updates the fit parameters storage format from cube (v0, one channel per 
+    parameter) into a set of files (v1, one FITS per parameter). 
+    """
+
+    if region != 'L1451mm' and region != 'IC348':
+        return 'error'
+
+    hdu=fits.open("{0}_parameter_maps_snr{1}.fits".format(region,snr_min))
+    hd=hdu[0].header
+    cube=hdu[0].data
+    hdu.close()
+    # blank bad pixels
+    cube[cube==0]=np.nan
+    # Clean header keyword
+    rm_key=['NAXIS3','CRPIX3','CDELT3', 'CUNIT3', 'CTYPE3', 'CRVAL3']
+    for key_i in rm_key:
+        hd.remove(key_i)
+    hd['NAXIS']= 2
+    hd['WCSAXES']= 2
+    # Tkin
+    hd['BUNIT']='K'
+    param=cube[0,:,:]
+    file_out="{0}_Tkin_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    #Tex
+    hd['BUNIT']='K'
+    param=cube[1,:,:]
+    file_out="{0}_Tex_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # N_NH3
+    hd['BUNIT']='cm-2'
+    param=cube[2,:,:]
+    file_out="{0}_N_NH3_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # sigma
+    hd['BUNIT']='km/s'
+    param=cube[3,:,:]
+    file_out="{0}_Sigma_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # Vlsr
+    hd['BUNIT']='km/s'
+    param=cube[4,:,:]
+    file_out="{0}_Vlsr_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # Fortho
+    hd['BUNIT']=''
+    param=cube[5,:,:]
+    file_out="{0}_Fortho_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # eTkin
+    hd['BUNIT']='K'
+    param=cube[6,:,:]
+    file_out="{0}_eTkin_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # eTex
+    hd['BUNIT']='K'
+    param=cube[7,:,:]
+    file_out="{0}_eTex_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # eN_NH3
+    hd['BUNIT']='cm-2'
+    param=cube[8,:,:]
+    file_out="{0}_eN_NH3_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # eSigma
+    hd['BUNIT']='km/s'
+    param=cube[9,:,:]
+    file_out="{0}_eSigma_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # eVlsr
+    hd['BUNIT']='km/s'
+    param=cube[10,:,:]
+    file_out="{0}_eVlsr_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+    # eFortho
+    hd['BUNIT']=''
+    param=cube[11,:,:]
+    file_out="{0}_eFortho_snr{1}_v1.fits".format(region,snr_min)
+    fits.writeto(file_out, param, hd, clobber=True)
+        #GAS.PropertyMaps.update_cubefit(region=region)
         
