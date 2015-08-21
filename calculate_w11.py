@@ -1,4 +1,6 @@
 from spectral_cube import SpectralCube
+from radio_beam import Beam
+from astropy.io import fits
 
 import astropy.units as u
 freq11= 23.6944955*u.GHz
@@ -23,4 +25,6 @@ def cube_w11(region='IC348'):
     vcube = cube.with_spectral_unit(u.km/u.s, rest_value=freq11, velocity_convention='radio')
     slab = vcube.spectral_slab( vmax*u.km/u.s, vmin*u.km/u.s)
     w11=slab.moment( order=0, axis=0)
-    w11.write(OneOneFile.replace('.fits','_w11.fits') )
+    beam = Beam.from_fits_header(fits.getheader(OneOneFile))
+    w11.beam = slab.beam
+    w11.write(OneOneFile.replace('.fits','_w11.fits'), overwrite=True)
