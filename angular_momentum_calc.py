@@ -52,7 +52,10 @@ def calculate_j( file_v, distance=250., sep_max=150., do_plot=True, ra0=0.0, dec
     beam=np.abs( hd['BMAJ']/hd['CDELT1'] )
     # Calculate relative distance and velocity
     xv, yv = np.meshgrid(np.arange(0,size[1]), np.arange(0,size[0]), sparse=False, indexing='xy')
-    dist=np.sqrt( ( (xv - xc)*np.cos(angle) )**2 + ( (yv - yc)*np.sin(angle) )**2)
+    r_dist = np.sqrt( (xv - xc)**2 + (yv - yc)**2 )
+    theta_dist = np.arctan( (yv - yc)/(xv - xc))
+    dist= r_dist * np.abs( np.sin( angle-theta_dist))
+    # dist= r_dist * cos(np.sqrt( ( (xv - xc)*np.cos(angle) )**2 + ( (yv - yc)*np.sin(angle) )**2)
     v_rel=v - v[ int(yc), int(xc)]
     j = np.abs(v_rel*dist*d_pix*au_pc)
     # 
@@ -72,12 +75,15 @@ def calculate_j( file_v, distance=250., sep_max=150., do_plot=True, ra0=0.0, dec
         print j[ymin:ymax,xmin:xmax].shape
         print dist[int(xc),int(yc)]
         print extent
-        f, axarr = plt.subplots(1,2)
+        f, axarr = plt.subplots(1,3)
         img0=axarr[0].imshow( v_rel[ymin:ymax,xmin:xmax], origin='lower', extent=extent)
         axarr[0].scatter(0,0, c='r', alpha=0.5)
         axarr[0].arrow(0,0, 0.5*sep_max*np.cos(angle), 0.5*sep_max*np.sin(angle))
         img1=axarr[1].imshow( j[ymin:ymax,xmin:xmax], origin='lower', extent=extent)
+        img2=axarr[2].imshow( dist[ymin:ymax,xmin:xmax], origin='lower', extent=extent)
         axarr[1].scatter(0,0, c='r', alpha=0.5)
+        axarr[2].scatter(0,0, c='r', alpha=0.5)
         plt.colorbar(img0, orientation='horizontal')
         plt.colorbar(img1, orientation='horizontal')
+        plt.colorbar(dist, orientation='horizontal')
     return mean_ang_mom( dist_gd, j_gd, beam*d_pix)
