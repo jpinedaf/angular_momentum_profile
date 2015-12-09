@@ -7,22 +7,39 @@ import astropy.wcs as wcs
 import matplotlib.pyplot as plt
 import aplpy
 
-def mean_ang_mom( x, y, dx):
+def mean_ang_mom( x, y, dx, log=False):
     """ Define averaging function
+    It returns the average of y in the range [x, x+dx], where the bin size are 
+    constant in linear space. 
+    If log=True, then the bin sizes are constant in log space, and the average is 
+    calculated in the range [log(x), log(x)+dx].
     """
-    xmin=np.min(x)
-    n_bin=int(np.ceil((np.max(x)-xmin)/dx))
+    if log == False:
+        # Linear space
+        xx=x
+    else:
+        # log space
+        xx=np.log(x)
+
+    xmin=np.min(xx)
+    xmax=np.max(xx)
+    n_bin=int(np.ceil((xmax-xmin)/dx))
     xbin=np.zeros(n_bin)
     dxbin=np.zeros(n_bin)
     ybin=np.zeros(n_bin)
     dybin=np.zeros(n_bin)
     for i in range(n_bin):
-        idx=np.where( (x>xmin+dx*i) & (x<xmin+dx*(i+1)))
-        xbin[i] =np.mean(x[idx])
+        idx=np.where( (xx>xmin+dx*i) & (xx<xmin+dx*(i+1)))
+        # xbin[i] =np.mean(xx[idx])
+        xbin[i] = xmin+dx*(i+0.5)
         ybin[i] =np.mean(y[idx])
-        dxbin[i]=np.std(x[idx])
+        # dxbin[i]=np.std(xx[idx])
+        dxbin[i] = dx*0.5
         dybin[i]=np.std(y[idx])
-    return xbin, ybin, dxbin, dybin
+    if log == False:
+        return xbin, ybin, dxbin, dybin
+    else:
+        return np.exp(xbin), ybin, dxbin, dybin
 
 def calculate_j( file_v, distance=250.*u.pc, do_plot=True, ra0=0.0, dec0=0.0, angle=0.0*u.deg):
     """ 

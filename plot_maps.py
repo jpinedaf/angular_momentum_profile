@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import aplpy
 import numpy as np
 
+from matplotlib import rc
+
+rc('font',**{'family':'Helvetica','sans-serif':['Helvetica']}) 
+rc('text', usetex=True)
+
+#
 file_in=['IRAS03282/IRAS03282','IC348mm/IC348mm','L1451mm/L1451mm']
 Vlsr_ext='_Vlsr_snr5.0_v1.fits'
 W11_ext='-11_cvel_clean_rob05_w11.fits'
@@ -23,8 +29,8 @@ label_color='white'
 color_sp='#377eb8'
 xpos_label=0.05; ypos_label=0.9
 
-xsize=8; ysize=5
-dx_pos=3./xsize; dy_pos=3./ysize; x0_pos=0.175; y0_pos=0.1
+xsize=7.5; ysize=4.
+dx_pos=3./xsize; dy_pos=3./ysize; x0_pos=0.175; y0_pos=0.125
 
 
 subplot=[x0_pos, y0_pos, dx_pos, dy_pos]
@@ -44,7 +50,7 @@ v_ticks=[ [6.8, 7.15, 7.5], [8.8, 9.15, 9.5], [3.9, 4.15, 4.4]]
 c_lev=np.arange(5,20,2)
 
 for i in range(len(file_in)):
-    # file_i=file_in[i]
+    #
     file_v=file_in[i]+Vlsr_ext
     file_w_raw=file_in[i]+W11_ext
     file_w='test.fits'
@@ -93,6 +99,9 @@ for i in range(len(file_in)):
     fig0.ticks.set_minor_frequency(4)
     fig0.tick_labels.set_xformat('hh:mm:ss')
     fig0.tick_labels.set_yformat('dd:mm:ss')
+
+    fig0.ticks.set_xspacing(55.*u.arcsec.to(u.deg))  # degrees
+    fig1.ticks.set_xspacing(55.*u.arcsec.to(u.deg))  # degrees
 
     #Colorbars 
     # Panel a)
