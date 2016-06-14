@@ -130,8 +130,8 @@ def cubefit(region='IC348', do_plot=True,
     cube11.fiteach(fittype='ammonia',  guesses=guesses,
                   integral=False, verbose_level=3, 
                   fixed=[T,F,F,F,F,T], signal_cut=2,
-                  limitedmax=[F,F,F,F,T,T],
-                  maxpars=[0,0,0,0,vmax,1],
+                  limitedmax=[F,F,T,F,T,T],
+                  maxpars=[0,0,17.0,0,vmax,1],
                   limitedmin=[T,T,T,T,T,T],
                   minpars=[5,2.8,12.0,0,vmin,0],
                   start_from_point=(xmax,ymax),
@@ -241,5 +241,4 @@ def convert_param_file(region='L1451mm', snr_min=5.0):
     param=cube[11,:,:]
     file_out="{0}_eFortho_snr{1}_v1.fits".format(region,snr_min)
     fits.writeto(file_out, param, hd, clobber=True)
-    #GAS.PropertyMaps.update_cubefit(region=region)
-        
+    
